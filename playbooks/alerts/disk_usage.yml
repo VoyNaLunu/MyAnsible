@@ -1,0 +1,36 @@
+---
+- name: check disk usage
+  hosts: all
+  #for testing
+  #hosts: 127.0.0.1
+  #connection: local
+  vars:
+    ansible_user: root
+  tasks:
+  - name: check disk usage
+    block:
+      - include_vars: env.yml
+      - set_fact:
+          mount: "{{ ansible_mounts | first }}"
+          
+      - set_fact:
+          used_space: "{{ mount.size_total - mount.size_available }}"
+
+      - set_fact:
+          used_percent: "{{ (used_space|int) / (mount.size_total|int ) * 100 }}"
+
+      - name: check if used space doesn't exceed maximum disk usage
+        assert:
+          that:
+            - (used_percent | int) <= {{ max_disk_usage }}
+          fail_msg: "WARNING, server {{ ansible_host }} / {{ ansible_default_ipv4.address }} approached used disk space limit of {{ max_disk_usage }}%: {{ used_percent|int }}% used"
+          success_msg: "Current disk usage {{ used_percent|int }}%"
+
+    rescue:
+      - set_fact:
+          alert_message: 'WARNING,%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20approached%20used%20disk%20space%20limit%20of%20{{ max_disk_usage }}%):%20{{ used_percent|int }}%%20used'
+      
+      - name: send telegram alert if assert failed
+        uri:
+          url: https://api.telegram.org/bot{{ telegram_bot_token }}/sendMessage?chat_id={{ telegram_chat_id }}&text={{ alert_message }}
+          method: POST
