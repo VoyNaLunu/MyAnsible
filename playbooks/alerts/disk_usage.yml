@@ -28,7 +28,7 @@
 
     rescue:
       - set_fact:
-          alert_message: 'WARNING,%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20approached%20used%20disk%20space%20limit%20of%20{{ max_disk_usage }}%):%20{{ used_percent|int }}%%20used'
+          alert_message: 'WARNING,%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20approached%20used%20disk%20space%20limit%20of%20{{ max_disk_usage }}%:%20{{ used_percent|int }}%%20used'
       
       - name: send telegram alert if assert failed
         uri:
