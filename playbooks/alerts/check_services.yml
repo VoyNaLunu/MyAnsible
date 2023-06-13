@@ -1,0 +1,102 @@
+#TODO: make this more readable
+---
+###### collecting vars and facts
+    - name: switching from item to service_name for better readability
+      set_fact:
+        service_name: "{{ item }}"
+
+
+    - name: including additional variables and secrets
+      include_vars: env.yml
+
+
+    - name: gathering service facts
+      service_facts:
+    - debug:
+        var: ansible_facts.services
+
+    - name: get {{ service_name }} state
+      set_fact:
+        service_state: ansible_facts.services['{{ service_name }}'].state
+
+
+
+
+###### checks and alerts
+    ## checks service state
+    - name: check if {{ service_name }} is running
+      block:
+        - assert:
+            that:
+              "'running' in {{ service_state }}"
+            fail_msg: "{{ service_name }} is not running"
+            success_msg: "{{ service_name }} is running"
+    ## alerts if service isn't running
+      rescue:
+        - name: creating service is not running alert message for {{ service_name }}
+          set_fact:
+            alert_message: "WARNING,%20{{ service_name }}%20service%20is%20not%20running%20on%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }},%20attempting%20to%20restart"
+        
+        - name: sending alert message to telegram for {{ service_name }}
+          uri:
+            url: https://api.telegram.org/bot{{ telegram_bot_token }}/sendMessage?chat_id={{ telegram_chat_id }}&text={{ alert_message }}
+            method: POST
+
+
+
+
+      ##############################################################################
+      ## attempt to restart and alert if successful
+        - name: attempting to restart {{ service_name }}
+          block:
+          - name: restarting {{ service_name }}
+            systemd:
+              state: restarted
+              name: "{{ service_name }}"
+
+
+          - name: updating service facts
+            service_facts:
+
+
+          - name: getting {{ service_name }} state
+            set_fact:
+              service_state: ansible_facts.services['{{ service_name }}'].state
+
+        ###########################################################################################
+          - name: checking if {{ service_name }} is running after restart
+            block:
+              - assert:
+                  that:
+                    "'running' in {{ service_state }}"
+                  fail_msg: "not restarted"
+                  success_msg: "restarted"
+
+          - set_fact:
+              successful_restart_alert_message: "Successfully%20restarted%20{{ service_name }}%20on%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}"
+
+          - name: send telegram alert if assert failed
+            uri:
+              url: https://api.telegram.org/bot{{ telegram_bot_token }}/sendMessage?chat_id={{ telegram_chat_id }}&text={{ successful_restart_alert_message }}
+              method: POST
+      ## send alert if restart failed
+          rescue:
+          - name: updating service facts
+            service_facts:
+
+
+          - name: get {{ service_name }} status after failed restart
+            set_fact:
+              failed_service_state: "{{ ansible_facts.services[service_name]['state'] | default('service%20does%20not%20exist')}}"
+              failed_service_status: "{{ ansible_facts.services[service_name]['status'] | default('service%20does%20not%20exist')}}"
+
+
+          - name: creating failed restart alert message for {{ service_name }}
+            set_fact:
+              failed_restart_alert_message: "WARNING,%20failed%20to%20restart%20{{ service_name }}%20on%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20{{ service_name }}%20state%20is:%20{{ failed_service_state }},%20status%20is:%20{{ failed_service_status }}"
+
+          - name: send telegram alert that {{ service_name }} failed to restart
+            uri:
+              url: https://api.telegram.org/bot{{ telegram_bot_token }}/sendMessage?chat_id={{ telegram_chat_id }}&text={{ failed_restart_alert_message }}
+###########################################################################################
+
