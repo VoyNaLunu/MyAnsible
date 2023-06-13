@@ -93,7 +93,7 @@
 
           - name: creating failed restart alert message for {{ service_name }}
             set_fact:
-              failed_restart_alert_message: "WARNING,%20failed%20to%20restart%20{{ service_name }}%20on%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20{{ service_name }}%20state%20is:%20{{ failed_service_state }},%20status%20is:%20{{ failed_service_status }}"
+              failed_restart_alert_message: "WARNING,%20failed%20to%20restart%20{{ service_name }}%20on%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%0A{{ service_name }}%20state%20is:%20{{ failed_service_state }}%0A{{ service_name }}%20status%20is:%20{{ failed_service_status }}"
 
           - name: send telegram alert that {{ service_name }} failed to restart
             uri:
