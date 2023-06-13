@@ -1,6 +1,6 @@
 ---
 - name: check disk usage
-  hosts: all
+  hosts: "{{ hosts }}"
   #for testing
   #hosts: 127.0.0.1
   #connection: local
