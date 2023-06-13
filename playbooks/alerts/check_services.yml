@@ -12,8 +12,7 @@
 
     - name: gathering service facts
       service_facts:
-    - debug:
-        var: ansible_facts.services
+
 
     - name: get {{ service_name }} state
       set_fact:
