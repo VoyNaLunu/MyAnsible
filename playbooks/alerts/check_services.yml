@@ -5,14 +5,8 @@
       set_fact:
         service_name: "{{ item }}"
 
-
-    - name: including additional variables and secrets
-      include_vars: env.yml
-
-
     - name: gathering service facts
       service_facts:
-
 
     - name: get {{ service_name }} state
       set_fact:
