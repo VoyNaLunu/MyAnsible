@@ -2,7 +2,7 @@
 
 - name: upgrade all packages
   hosts: vps
-
+  gather_facts: true
   tasks:
     - name: upgrading packages on Debian based servers
       apt:

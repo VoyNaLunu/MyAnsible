@@ -2,7 +2,7 @@
 
 - name: install packages
   hosts: vps
-
+  gather_facts: true
   tasks:
     - name: installing common packages on Debian based servers
       apt:
@@ -11,6 +11,7 @@
           - tcpdump
           - pwgen
           - ncdu
+          - fail2ban
         state: present
         update_cache: yes
 

@@ -3,7 +3,7 @@
 
 - name: check disk usage
   hosts: hostings
-
+  gather_facts: false
   tasks:
     - name: including vars from env.yml
       include_vars: env.yml
