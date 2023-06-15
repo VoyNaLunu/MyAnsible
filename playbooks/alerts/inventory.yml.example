@@ -6,6 +6,8 @@ vps:
       ansible_host: host1.example.com
       ansible_user: root
       disk_usage_threshold_percent: 90
+      host_specific_packages:
+        - squid
       services:
         - squid
     host2:

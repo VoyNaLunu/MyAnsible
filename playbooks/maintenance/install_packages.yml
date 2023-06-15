@@ -1,0 +1,22 @@
+---
+
+- name: install packages
+  hosts: vps
+
+  tasks:
+    - name: installing common packages on Debian based servers
+      apt:
+        name:
+          - htop
+          - tcpdump
+          - pwgen
+          - ncdu
+        state: present
+        update_cache: yes
+
+    - name: installing common packages on Debian based servers
+      apt:
+        name: "{{ host_specific_packages }}"
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian" and host_specific_packages is defined
