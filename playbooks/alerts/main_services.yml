@@ -8,3 +8,4 @@
     - name: check services
       include_tasks: check_services.yml
       loop: "{{ services }}"
+      when: services is defined
