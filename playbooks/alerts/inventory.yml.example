@@ -21,13 +21,13 @@ hostings:
       ansible_host: 1.2.3.4
       ansible_user: user
       ansible_ssh_pass: password
-      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=accept-new'
       available_space_gb: 5
       disk_usage_threshold_percent: 80
     webhosting2:
       ansible_host: 5.6.7.8
       ansible_user: user2
       ansible_ssh_pass: password2
-      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=accept-new'
       available_space_gb: 40
       disk_usage_threshold_percent: 70
