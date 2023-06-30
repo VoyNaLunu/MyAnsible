@@ -1,0 +1,7 @@
+---
+
+- name: include package installation
+  import_playbook: install_packages.yml
+
+- name: include docker installation
+  import_playbook: install_docker.yml
