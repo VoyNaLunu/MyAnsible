@@ -1,0 +1,12 @@
+---
+
+vps_docker:
+  hosts:
+    host1:
+      ansible_host: host1.example.com
+      ansible_user: root
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=accept-new'
+      start_services: yes
+      services:
+        - reverse-proxy
+      server_repository: git@github.com:Example/vpn.example.com.git
