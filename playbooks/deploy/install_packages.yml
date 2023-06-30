@@ -1,7 +1,7 @@
 ---
 
 - name: install packages
-  hosts: vps
+  hosts: all
   gather_facts: true
   tasks:
     - name: installing common packages on Debian based servers
@@ -12,12 +12,49 @@
           - pwgen
           - ncdu
           - fail2ban
+          - iptables
+          - iptables-persistent
+          - git
         state: present
         update_cache: yes
 
-    - name: installing common packages on Debian based servers
+    - name: installing server specific packages on Debian based servers
       apt:
         name: "{{ host_specific_packages }}"
         state: present
         update_cache: yes
       when: ansible_facts['os_family'] == "Debian" and host_specific_packages is defined
+
+    - name: configuring services from repository
+      block:
+        - name: cloning server repository
+          git:
+            repo: "{{ server_repository }}"
+            dest: "/root/{{ ansible_host }}"
+            accept_hostkey: yes
+            update: true
+
+        - name: copying fail2ban config to /etc/fail2ban/jail.d
+          copy:
+            src: "/root/{{ ansible_host }}/fail2ban/custom.conf"
+            dest: "/etc/fail2ban/jail.d/custom.conf"
+            mode: "preserve"
+            remote_src: true
+
+        - name: restarting fail2ban
+          service:
+            enabled: true
+            name: fail2ban
+            state: restarted
+
+        - name: copying iptables rules
+          copy:
+            src: "/root/{{ ansible_host }}/iptables/rules.v4"
+            dest: "/etc/iptables/rules.v4"
+            mode: "preserve"
+            remote_src: true
+
+        - name: loading iptables configuration
+          command: "iptables-restore /etc/iptables/rules.v4"
+
+      when: server_repository is defined
