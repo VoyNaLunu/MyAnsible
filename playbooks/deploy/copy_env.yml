@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: copying env files to service folders
+      copy:
+        src: ./env_folder/.{{ item }}_env
+        dest: /root/{{ ansible_host }}/docker/{{ item }}/.env
+        mode: "preserve"
+      loop: "{{ services }}"
+      when: services is defined and item != "reverse-proxy"

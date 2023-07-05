@@ -17,13 +17,13 @@
           - git
           - openssh-server
         state: present
-        update_cache: yes
+        update_cache: true
 
     - name: installing server specific packages on Debian based servers
       apt:
         name: "{{ host_specific_packages }}"
         state: present
-        update_cache: yes
+        update_cache: true
       when: ansible_facts['os_family'] == "Debian" and host_specific_packages is defined
 
     - name: configuring services from repository
@@ -32,7 +32,7 @@
           git:
             repo: "{{ server_repository }}"
             dest: "/root/{{ ansible_host }}"
-            accept_hostkey: yes
+            accept_hostkey: true
             update: true
 
         - name: copying fail2ban config to /etc/fail2ban/jail.d
@@ -57,5 +57,7 @@
 
         - name: loading iptables configuration
           command: "iptables-restore /etc/iptables/rules.v4"
+          register: restore_result
+          changed_when: restore_result.rc == 0
 
       when: server_repository is defined

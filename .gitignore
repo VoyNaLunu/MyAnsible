@@ -1,3 +1,4 @@
 env.yml
 production*
 *test*
+.vscode/

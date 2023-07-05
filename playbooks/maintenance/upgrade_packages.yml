@@ -8,16 +8,16 @@
       apt:
         name: "*"
         state: latest
-        update_cache: yes
-        autoremove: yes
-        autoclean: yes
+        update_cache: true
+        autoremove: true
+        autoclean: true
       when: ansible_facts['os_family'] == "Debian"
 
     - name: upgrading packages on RedHat based servers
       yum:
         name: "*"
         state: latest
-        update_cache: yes
+        update_cache: true
       when: ansible_facts['os_family'] == "RedHat"
     - name: removing unused packages on RedHat based servers
       yum:

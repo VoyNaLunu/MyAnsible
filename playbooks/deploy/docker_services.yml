@@ -1,0 +1,21 @@
+---
+
+- name: Start all docker compose services
+  hosts: vps_docker
+  gather_facts: false
+  tasks:
+
+    - name: clone server repository
+      git:
+        repo: "{{ server_repository }}"
+        dest: "/root/{{ ansible_host }}"
+        accept_hostkey: true
+        update: true
+
+
+    - block:
+        - name: start docker compose services
+          community.docker.docker_compose:
+            project_src: /root/{{ ansible_host }}/{{ item }}
+          loop: "{{ services }}"
+      when: start_services == true and services is defined

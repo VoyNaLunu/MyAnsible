@@ -1,4 +1,4 @@
-#playbook for virtual private servers 
+# playbook for virtual private servers
 ---
 
 - name: check disk usage
@@ -15,12 +15,10 @@
     - name: calculating used space
       set_fact:
         used_space: "{{ mount.size_total - mount.size_available }}"
-    
+
     - name: calculating used space in percent
       set_fact:
         used_percent: "{{ (used_space|float / mount.size_total|float * 100) | float | round(2) }}"
-
-
 
 
     - name: checking if disk usage is below threshold
@@ -29,11 +27,16 @@
           assert:
             that:
               - used_percent|float <= disk_usage_threshold_percent|default(80)
-            fail_msg: "WARNING, server {{ ansible_host }} / {{ ansible_default_ipv4.address }} exceeded disk usage threshold of {{ disk_usage_threshold_percent|default(80) }}%, current disk usage: {{ used_percent }}%"
+            fail_msg: >-
+              "WARNING, server {{ ansible_host }} / {{ ansible_default_ipv4.address }}
+               exceeded disk usage threshold of {{ disk_usage_threshold_percent|default(80) }}%, current disk usage: {{ used_percent }}%"
             success_msg: "Current disk usage: {{ used_percent }}%"
       rescue:
-        - set_fact:
-            alert_message: "WARNING,%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}%20exceeded%20disk%20usage%20threshold%20of%20{{ disk_usage_threshold_percent|default(80) }}%%0Acurrent%20disk%20usage:%20{{ used_percent }}%"
+        - name: generating alert message
+          set_fact:
+            alert_message: >-
+              "WARNING,%20server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}
+              %20exceeded%20disk%20usage%20threshold%20of%20{{ disk_usage_threshold_percent|default(80) }}%%0Acurrent%20disk%20usage:%20{{ used_percent }}%"
 
         - name: sending telegram alert about exceeded threshold
           uri:
