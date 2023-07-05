@@ -15,6 +15,7 @@
           - iptables
           - iptables-persistent
           - git
+          - openssh-server
         state: present
         update_cache: yes
 
