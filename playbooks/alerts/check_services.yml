@@ -57,23 +57,25 @@
       ###########################################################################################
         - name: checking if {{ service_name }} is running after restart
           block:
-            - assert:
+            - name: asserting that {{ service_name }} is running
+              assert:
                 that:
                   "'running' in {{ service_state }}"
                 fail_msg: "not restarted"
                 success_msg: "restarted"
 
-        - set_fact:
-            successful_restart_alert_message: >-
-              "Successfully%20restarted%20{{ service_name }}%20on%20
-              server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}"
+            - name: generating successful restart alert message
+              set_fact:
+                successful_restart_alert_message: >-
+                  "Successfully%20restarted%20{{ service_name }}%20on%20
+                  server%20{{ ansible_host }}%20/%20{{ ansible_default_ipv4.address }}"
 
-        - name: send telegram alert if assert failed
-          uri:
-            url: >-
-              "https://api.telegram.org/bot{{ telegram_bot_token }}
-              /sendMessage?chat_id={{ telegram_chat_id }}&text={{ successful_restart_alert_message }}"
-            method: POST
+            - name: send telegram alert if assert failed
+              uri:
+                url: >-
+                  "https://api.telegram.org/bot{{ telegram_bot_token }}
+                  /sendMessage?chat_id={{ telegram_chat_id }}&text={{ successful_restart_alert_message }}"
+                method: POST
   ## send alert if restart failed
       rescue:
         - name: updating service facts

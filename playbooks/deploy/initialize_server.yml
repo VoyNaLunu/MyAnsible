@@ -35,12 +35,11 @@
             accept_hostkey: true
             update: true
 
-        - name: copying fail2ban config to /etc/fail2ban/jail.d
-          copy:
+        - name: linking fail2ban config to /etc/fail2ban/jail.d
+          file:
             src: "/root/{{ ansible_host }}/fail2ban/custom.conf"
             dest: "/etc/fail2ban/jail.d/custom.conf"
-            mode: "preserve"
-            remote_src: true
+            state: link
 
         - name: restarting fail2ban
           service:
@@ -48,12 +47,11 @@
             name: fail2ban
             state: restarted
 
-        - name: copying iptables rules
-          copy:
+        - name: linking iptables rules
+          file:
             src: "/root/{{ ansible_host }}/iptables/rules.v4"
             dest: "/etc/iptables/rules.v4"
-            mode: "preserve"
-            remote_src: true
+            state: link
 
         - name: loading iptables configuration
           command: "iptables-restore /etc/iptables/rules.v4"
